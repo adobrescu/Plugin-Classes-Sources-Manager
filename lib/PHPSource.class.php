@@ -69,7 +69,6 @@ class PHPSource
 					break;
 			}
 		}
-		print_r($this->classes);
 	}
 	/*
 	 * findExpression
@@ -110,6 +109,10 @@ class PHPSource
 		}
 		
 		return $source;
+	}
+	public function getDeclaredClasses()
+	{
+		return $this->classes;
 	}
 }
 
