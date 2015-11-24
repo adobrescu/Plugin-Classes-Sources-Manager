@@ -1,3 +1,131 @@
+
+Package content
+---------------
+
+3 PHP classes located in "lib" dir. The other PHP files were used for tests.
+
+What the software does
+----------------------
+
+They contain functionality that allow:
+
+
+Extending OOP applications with "plugin" classes
+------------------------------------------------
+
+Example:
+
+- The application have some core libraries, one of them may look something like this:
+	//Application class
+	class App 
+	{
+		...
+
+		protected function init()
+		{
+			//called from the constructor
+			//app initialisation
+		}
+		public function sayHello()
+		{
+			echo 'Hello';
+		}
+		...
+	}
+
+- Besides libraries, the application contain scripts and other classes that use the libraries:
+	
+	$app=new App();
+	...
+	$app->sayHello();
+	...
+
+- One of the software customers, want his app to say "Hello, Mr. Smith"
+- There are 2 ways to go:
+1. We modify class App to say "Hello, Mr. Smith". But this force us to create and maintain the customised version of the app in a different branch.
+So it's not that good.
+
+2. We extend the class App:
+	
+	class MrSmithApp extends App
+	{
+		public function sayHello()
+		{
+			parent::sayHello();
+			echo ', Mr. Smith';
+		}
+	}
+
+But we have the same problem as (1), this time with other sources:
+
+	...
+	$app=new App();
+	...
+	$app->sayHello();
+	...
+
+Should be replaced with:
+
+	...
+	$app=new MrSmithApp();
+	...
+	$app->sayHello();
+	...
+
+- We ca do a little trick:
+
+1. Rename App to App_BASE and create a new empty class App that extends App_BASE
+
+	class App_BASE
+	{
+	}
+
+
+	class App extends App_BASE
+	{
+	}
+
+2. Insert Mr. Smith class in the middle and modify the inheritance chain:
+	
+	class App_BASE
+	{
+	}
+
+	class MrSmithApp extends App_Base
+	{
+	}
+
+	class App extends App_MrSmithApp
+	{
+	}
+
+- We still need a Mr. Smith own version of classes, but the changes are minor. The code where App is declared might look:
+
+	class App_BASE
+	{
+	}
+
+	include_once(PLUGINS_DIRECTORY.'/plugins.php'); //plugins.php contains "plugin" classes
+
+	class App extends App_MrSmithApp
+	{
+	}
+
+- If we had a piece of software that does all the replacements above on the original sources, we could give Mr. Smith exactly the same version of software
+as the other customers get plus his plugin.
+
+- The classes from "lib" dir of this package do exactly that. Given a plugins directory and a directory where the main/core/base classes are located:
+
+1. They detect which classes are declared within plugin sources.
+2. Which classes they extend;
+3. Deal with more than one "plugin" classes that extend the same base/core class;
+4. For now it generates one file containing all plugin classes that inerits one from an other;
+5. Modify the original base/core classes sources so it renames the base classes, adds an "include" to the file above, and creates the empty class that close the inheritance chain;
+
+
+RO
+====
+
 Pachetul contine o cateva clase PHP si cateva clase de test.
 
 Clasele implementeaza o functionalitate prin care o clasa oarecare poate fi extinsa intr-un mod putin mai neobisnuit, permitand
