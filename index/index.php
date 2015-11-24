@@ -57,8 +57,10 @@
 	
 	if($sources=$pm->rebuildSources($skipPHPTags=true))
 	{
-		foreach($sources['base'] as $baseClassName=>$baseSource)
+		
+		foreach($sources['base'] as $baseSource)
 		{
+			//echo 'da: '.$baseClassName."\n";
 			$baseClassCacheFileName=mapFileName2Path(realpath($baseSource['filename']), realpath(__DIR__.'/../plugin-classes/original-base-classes'));
 				
 			$cacheDir=dirname(__DIR__.'/../plugin-classes/original-base-classes/'.$baseClassCacheFileName);
@@ -80,7 +82,7 @@
 					PHP_EOL.PHP_EOL.'include_once(\'hooks.php\');'.
 					PHP_EOL.PHP_EOL.'?>'.
 					PHP_EOL.'<?php'.
-					PHP_EOL.PHP_EOL.$sources['dummy_base'][$baseClassName]
+					PHP_EOL.PHP_EOL.$sources['dummy_base'][$baseSource['class']]
 					:'')
 					, 0);
 		}

@@ -225,9 +225,10 @@ abstract class PluginsSourcesManager
 		
 		$renamedBaseClasses=array();
 		
-		
+		//print_r($this->baseClassNames);
 		foreach($this->baseClassNames as $baseClassName=>$baseNewClassName)
 		{
+			
 			$baseClassSources[$baseClassName]=$this->getBaseClassFileName($baseClassName);
 			
 			$declaredClasses=$baseClassSources[$baseClassName]->getDeclaredClasses();
@@ -235,8 +236,7 @@ abstract class PluginsSourcesManager
 			$renamedBaseClassName=$this->formatBaseClassRenamed($baseClassName);
 			
 			if(isset($declaredClasses[$renamedBaseClassName]))
-			{
-				//base source already modified 
+			{//base source already modified 
 				$renamedBaseClasses[$baseClassName]=1;
 				continue;
 			}
@@ -258,17 +258,18 @@ abstract class PluginsSourcesManager
 			{
 				$baseClassSource->renameClass($baseClassName, $baseNewClassName);
 				$renamedBaseClasses[$baseClassName]=1;
-			}
-			if(!isset($sources['base'][$baseClassName]))
-			{
-				$sources['base'][$baseClassName]=array(
-					'class' => $baseClassName,
-					'filename' => $baseClassSource->getFileName(),
-					'source' => $baseClassSource->rebuildSource(0, 0, true, $appendCloseTagIfNeeded) );
-				
-				
-				
-				
+			
+				if(!isset($sources['base'][$baseClassName]))
+				{
+					$sources['base'][$baseClassName]=array(
+						'class' => $baseClassName,
+						'filename' => $baseClassSource->getFileName(),
+						'source' => $baseClassSource->rebuildSource(0, 0, true, $appendCloseTagIfNeeded) );
+
+
+
+
+				}
 			}
 		}
 		/*
