@@ -91,11 +91,11 @@ Should be replaced with:
 	{
 	}
 
-	class MrSmithApp extends App_Base
+	class MrSmithApp extends App_BASE
 	{
 	}
 
-	class App extends App_MrSmithApp
+	class App extends MrSmithApp
 	{
 	}
 
@@ -107,12 +107,12 @@ Should be replaced with:
 
 	include_once(PLUGINS_DIRECTORY.'/plugins.php'); //plugins.php contains "plugin" classes
 
-	class App extends App_MrSmithApp
+	class App extends MrSmithApp
 	{
 	}
 
-- If we had a piece of software that does all the replacements above on the original sources, we could give Mr. Smith exactly the same version of software
-as the other customers get plus his plugin.
+- If we had a piece of software that does all the replacements above in the original sources, we could give Mr. Smith exactly the same version of software
+as the other customers get + his plugin.
 
 - The classes from "lib" dir of this package do exactly that. Given a plugins directory and a directory where the main/core/base classes are located:
 
@@ -124,7 +124,7 @@ as the other customers get plus his plugin.
 
 
 RO
-====
+================================================================
 
 Pachetul contine o cateva clase PHP si cateva clase de test.
 
