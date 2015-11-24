@@ -90,6 +90,6 @@
 			$pluginSource2.=($pluginSource2?PHP_EOL:'').$pluginSource;//['source'];
 		}
 		
-		echo $pluginSource2;
+		file_put_contents(__DIR__.'/../plugin-classes/hooks.php',  $pluginSource2);
 	}
 	
