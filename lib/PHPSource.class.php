@@ -113,6 +113,12 @@ class PHPSource
 					elseif($this->tokens[$i][1]=='}')
 					{
 						$classBrakets--;
+						if($classBrakets==0)
+						{
+							end($this->classes);//[$this->currentNS]);
+							$lastFullClassName=key($this->classes);
+							$this->classes[$lastFullClassName]['end_token']=$i;
+						}
 					}
 						
 					break;
@@ -178,7 +184,19 @@ class PHPSource
 					{//within a class brackets, "use" is used with traits
 						break;
 					}
-					$classNameEndToken=$this->findNextTokens($i+1, array(T_AS));
+					$classNameEndToken=$this->findNextTokens($i+1, array(T_AS), ';');
+					
+					if($classNameEndToken==-1)
+					{
+						$classNameEndToken=$classNameAliasEndToken=$this->findNextTokens($i+1, array(';'));
+						$hasDifferentName=false;
+						
+					}
+					else
+					{
+						$hasDifferentName=true;
+					}
+					
 					$use=$className=$this->rebuildSource($i+1, $classNameEndToken-1, false);
 					
 					if($className[0]!='\\')
@@ -186,9 +204,18 @@ class PHPSource
 						$className='\\'.$className;
 					}
 					
-					$classNameAliasEndToken=$this->findNextTokens($classNameEndToken+1, array(';'));
-					$classNameAlias=$this->rebuildSource($classNameEndToken+1, $classNameAliasEndToken-1, false);
-					
+					if($hasDifferentName)
+					{
+						$classNameAliasEndToken=$this->findNextTokens($classNameEndToken+1, array(';'));
+						$classNameAlias=$this->rebuildSource($classNameEndToken+1, $classNameAliasEndToken-1, false);
+					}
+					else
+					{
+						$classNameParts=static::___getClassNameParts($className);
+						//print_r($classNameParts);
+						$classNameAlias=$classNameParts['class'];
+						
+					}
 					$this->classAliases[$this->currentNS.'\\'.$classNameAlias]=array(
 						'use' => $use,
 						'use_start_token' => $i+2,
@@ -250,8 +277,12 @@ class PHPSource
 	 * 
 	 * returns the tokens between $foreTokens and $backTokens
 	 */
-	protected function findNextTokens($i, $findTokens)
+	protected function findNextTokens($i, $findTokens, $stopTokens=array())
 	{
+		if(!is_array($stopTokens))
+		{
+			$stopTokens=array($stopTokens);
+		}
 		for($j=$i; $j<count($this->tokens); $j++)
 		{
 			$tokenFound=false;
@@ -269,6 +300,15 @@ class PHPSource
 			{
 				return $j;
 			}
+			foreach($stopTokens as $stopToken)
+			{
+				if( ( gettype($stopToken)=='string' && $this->tokens[$j][1]==$stopToken) 
+					||
+					gettype($stopToken)=='integer' && $this->tokens[$j][0]==$stopToken)
+				{
+					return -1;
+				}
+			}
 		}
 	}
 	public function rebuildSource($start=0, $end=0, $allowSpaces=true, $appendCloseTagIfNeeded=false)
@@ -276,7 +316,7 @@ class PHPSource
 		$source='';
 		if($end<=0)
 		{
-			$end=count($this->tokens)-1-$end;
+			$end=count($this->tokens)-1+$end;
 		}
 		for($i=$start; $i<=$end; $i++)
 		{
@@ -367,6 +407,11 @@ class PHPSource
 		{
 			$this->insertComment($this->classes[$fullClassName]['signature_start_token']-1, array('Original signature:', $this->classes[$fullClassName]['signature']));
 		}
+	}
+	public function insertCode($token, $code)
+	{
+		$this->tokens[$token][0]=-1;
+		$this->tokens[$token][1].=$code;
 	}
 	public function insertComment($token, $commentLines)
 	{
